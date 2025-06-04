@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquare, Zap, Shield, Heart, Sparkles } from "lucide-react";
-import Link from "next/link";
+
 import { auth } from "@/lib/auth";
 import { SiteHeader } from "@/components/site-header";
 
