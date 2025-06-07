@@ -31,10 +31,22 @@ export async function POST(
     }
 
     const body = await request.json()
-    console.log('body:', body)
+    console.log('原始请求体:', body)
+
+    // 重新组织数据
+    const reorganizedBody = {
+      timestamp: new Date().toISOString(),
+      data: body,
+      metadata: {
+        source: request.headers.get('user-agent') || 'unknown',
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      }
+    }
+
+    console.log('重新组织后的数据:', reorganizedBody)
 
     const processedTemplate = safeInterpolate(endpoint.rule, {
-      body,
+      body: reorganizedBody,
     })
 
     const messageObj = JSON.parse(processedTemplate)

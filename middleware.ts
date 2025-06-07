@@ -5,6 +5,15 @@ import type { NextRequest } from "next/server"
 export async function middleware(request: NextRequest) {
   const session = await auth()
   
+  // 根路径重定向
+  if (request.nextUrl.pathname === "/") {
+    if (session) {
+      return NextResponse.redirect(new URL("/moe/endpoints", request.url))
+    } else {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+  }
+
   // 需要保护的 API 路由
   if (request.nextUrl.pathname.startsWith("/api/")) {
     // 检查是否是需要保护的 API 端点
@@ -45,6 +54,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // 根路径
+    "/",
     // API 路由
     "/api/channels/:path*",
     "/api/endpoint-groups/:path*", 
