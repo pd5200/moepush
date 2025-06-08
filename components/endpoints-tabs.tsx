@@ -112,6 +112,7 @@ export function EndpointsTabs({ initialEndpoints, channels }: { initialEndpoints
               <EndpointGroupTable 
                 groups={groups}
                 onGroupsUpdate={loadGroups}
+                allEndpoints={endpoints}
               />
             )}
           </CardContent>

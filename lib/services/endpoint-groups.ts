@@ -112,4 +112,26 @@ export async function testEndpointGroup(group: EndpointGroupWithEndpoints): Prom
   }
 
   return response.json()
+}
+
+export interface UpdateEndpointGroupData {
+  name: string
+  endpointIds: string[]
+}
+
+export async function updateEndpointGroup(id: string, data: UpdateEndpointGroupData) {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json() as { message: string }
+    throw new Error(error.message || '更新接口组失败')
+  }
+
+  return response.json()
 } 

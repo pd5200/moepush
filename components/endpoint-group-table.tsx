@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Loader2, Trash, Eye, Power, Send } from "lucide-react"
+import { Loader2, Trash, Eye, Power, Send, Pencil } from "lucide-react"
+import { Endpoint } from "@/lib/db/schema/endpoints"
 
 import {
   Table,
@@ -35,18 +36,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal } from "lucide-react"
+import { EditEndpointGroupDialog } from "./edit-endpoint-group-dialog"
 
 interface EndpointGroupTableProps {
   groups: EndpointGroupWithEndpoints[]
   onGroupsUpdate: () => void
+  allEndpoints: Endpoint[]
 }
 
-export function EndpointGroupTable({ groups, onGroupsUpdate }: EndpointGroupTableProps) {
+export function EndpointGroupTable({ 
+  groups, 
+  onGroupsUpdate,
+  allEndpoints 
+}: EndpointGroupTableProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [groupToDelete, setGroupToDelete] = useState<EndpointGroupWithEndpoints | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [viewExample, setViewExample] = useState<EndpointGroupWithEndpoints | null>(null)
+  const [editGroup, setEditGroup] = useState<EndpointGroupWithEndpoints | null>(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [isTesting, setIsTesting] = useState<string | null>(null)
   const { toast } = useToast()
@@ -206,6 +214,10 @@ export function EndpointGroupTable({ groups, onGroupsUpdate }: EndpointGroupTabl
                           <Eye className="mr-2 h-4 w-4" />
                           查看示例
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditGroup(group)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          编辑
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleTest(group)}
                           disabled={isTesting === group.id || group.status === "inactive"}
@@ -273,6 +285,14 @@ export function EndpointGroupTable({ groups, onGroupsUpdate }: EndpointGroupTabl
         group={viewExample}
         open={!!viewExample}
         onOpenChange={(open) => !open && setViewExample(null)}
+      />
+
+      <EditEndpointGroupDialog
+        group={editGroup}
+        open={!!editGroup}
+        onOpenChange={(open) => !open && setEditGroup(null)}
+        allEndpoints={allEndpoints}
+        onSuccess={onGroupsUpdate}
       />
     </div>
   )
