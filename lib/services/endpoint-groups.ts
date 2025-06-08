@@ -120,6 +120,10 @@ export interface UpdateEndpointGroupData {
 }
 
 export async function updateEndpointGroup(id: string, data: UpdateEndpointGroupData) {
+  if (!data.endpointIds.length) {
+    throw new Error('请至少选择一个接口')
+  }
+
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
     headers: {
@@ -129,8 +133,8 @@ export async function updateEndpointGroup(id: string, data: UpdateEndpointGroupD
   })
 
   if (!response.ok) {
-    const error = await response.json() as { message: string }
-    throw new Error(error.message || '更新接口组失败')
+    const error = await response.json() as { error?: string; message?: string }
+    throw new Error(error.error || error.message || '更新接口组失败')
   }
 
   return response.json()

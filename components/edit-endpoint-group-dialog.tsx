@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -54,21 +54,44 @@ export function EditEndpointGroupDialog({
   onSuccess
 }: EditEndpointGroupDialogProps) {
   const [isPending, setIsPending] = useState(false)
-  const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>(group?.endpoints || [])
+  const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>([])
   const { toast } = useToast()
   const router = useRouter()
 
   const form = useForm<EditEndpointGroupFormValues>({
     resolver: zodResolver(editEndpointGroupSchema),
     defaultValues: {
-      name: group?.name || "",
+      name: "",
     },
   })
+
+  useEffect(() => {
+    if (group) {
+      form.reset({
+        name: group.name,
+      })
+      setSelectedEndpoints(group.endpoints || [])
+    }
+  }, [group, form])
+
+  useEffect(() => {
+    if (!open) {
+      form.reset()
+      setSelectedEndpoints([])
+    }
+  }, [open, form])
 
   const toggleEndpointSelection = (endpoint: Endpoint) => {
     setSelectedEndpoints(prev => {
       const isSelected = prev.some(e => e.id === endpoint.id)
       if (isSelected) {
+        if (prev.length === 1) {
+          toast({
+            variant: "destructive",
+            description: "至少需要选择一个接口",
+          })
+          return prev
+        }
         return prev.filter(e => e.id !== endpoint.id)
       } else {
         return [...prev, endpoint]
@@ -108,7 +131,7 @@ export function EditEndpointGroupDialog({
       console.error('更新接口组失败:', error)
       toast({
         variant: "destructive",
-        description: "更新接口组失败，请重试"
+        description: error instanceof Error ? error.message : "更新接口组失败，请重试"
       })
     } finally {
       setIsPending(false)
