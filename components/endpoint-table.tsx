@@ -43,12 +43,20 @@ import { useRouter } from "next/navigation"
 import { deleteEndpoint, toggleEndpointStatus, testEndpoint } from "@/lib/services/endpoints"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
 
 interface EndpointTableProps {
   endpoints: Endpoint[]
   channels: Channel[]
   onEndpointsUpdate: () => void
   onGroupCreated: () => void
+  groups?: EndpointGroupWithEndpoints[]
 }
 
 export function EndpointTable({ 
@@ -56,6 +64,7 @@ export function EndpointTable({
   channels,
   onEndpointsUpdate,
   onGroupCreated,
+  groups = [],
 }: EndpointTableProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -237,7 +246,36 @@ export function EndpointTable({
                       />
                     </TableCell>
                     <TableCell className="font-mono">{endpoint.id}</TableCell>
-                    <TableCell>{endpoint.name}</TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>{endpoint.name}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {groups.filter(group => 
+                              group.endpoints.some((e: Endpoint) => e.id === endpoint.id)
+                            ).length > 0 ? (
+                              <div className="space-y-1">
+                                <p className="font-medium">所属接口组：</p>
+                                {groups
+                                  .filter(group => 
+                                    group.endpoints.some((e: Endpoint) => e.id === endpoint.id)
+                                  )
+                                  .map(group => (
+                                    <p key={group.id} className="text-sm">
+                                      • {group.name}
+                                    </p>
+                                  ))
+                                }
+                              </div>
+                            ) : (
+                              <p>未加入任何接口组</p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell>{channel?.name}</TableCell>
                     <TableCell>
                       <Popover>
